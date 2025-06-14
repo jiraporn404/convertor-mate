@@ -1,6 +1,5 @@
 import { Snackbar, Alert } from "@mui/material";
 import type { AlertProps } from "@mui/material";
-import { useSnackbar } from "../../hooks/useSnackbar";
 
 interface CustomSnackbarProps {
   autoHideDuration?: number;
