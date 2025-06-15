@@ -9,18 +9,18 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as MockDataRouteImport } from './routes/mock-data'
 import { Route as GenerateTextRouteImport } from './routes/generate-text'
-import { Route as FakeDataRouteImport } from './routes/fake-data'
 import { Route as IndexRouteImport } from './routes/index'
 
+const MockDataRoute = MockDataRouteImport.update({
+  id: '/mock-data',
+  path: '/mock-data',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const GenerateTextRoute = GenerateTextRouteImport.update({
   id: '/generate-text',
   path: '/generate-text',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FakeDataRoute = FakeDataRouteImport.update({
-  id: '/fake-data',
-  path: '/fake-data',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -31,48 +31,48 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/fake-data': typeof FakeDataRoute
   '/generate-text': typeof GenerateTextRoute
+  '/mock-data': typeof MockDataRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/fake-data': typeof FakeDataRoute
   '/generate-text': typeof GenerateTextRoute
+  '/mock-data': typeof MockDataRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/fake-data': typeof FakeDataRoute
   '/generate-text': typeof GenerateTextRoute
+  '/mock-data': typeof MockDataRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/fake-data' | '/generate-text'
+  fullPaths: '/' | '/generate-text' | '/mock-data'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/fake-data' | '/generate-text'
-  id: '__root__' | '/' | '/fake-data' | '/generate-text'
+  to: '/' | '/generate-text' | '/mock-data'
+  id: '__root__' | '/' | '/generate-text' | '/mock-data'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  FakeDataRoute: typeof FakeDataRoute
   GenerateTextRoute: typeof GenerateTextRoute
+  MockDataRoute: typeof MockDataRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/mock-data': {
+      id: '/mock-data'
+      path: '/mock-data'
+      fullPath: '/mock-data'
+      preLoaderRoute: typeof MockDataRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/generate-text': {
       id: '/generate-text'
       path: '/generate-text'
       fullPath: '/generate-text'
       preLoaderRoute: typeof GenerateTextRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/fake-data': {
-      id: '/fake-data'
-      path: '/fake-data'
-      fullPath: '/fake-data'
-      preLoaderRoute: typeof FakeDataRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -87,8 +87,8 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  FakeDataRoute: FakeDataRoute,
   GenerateTextRoute: GenerateTextRoute,
+  MockDataRoute: MockDataRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

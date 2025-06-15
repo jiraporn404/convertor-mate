@@ -1,53 +1,64 @@
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import MailIcon from "@mui/icons-material/Mail";
+import CssIcon from "@mui/icons-material/Css";
+import EditNoteIcon from "@mui/icons-material/EditNote";
 import MenuIcon from "@mui/icons-material/Menu";
-import InboxIcon from "@mui/icons-material/MoveToInbox";
+import NewspaperIcon from "@mui/icons-material/Newspaper";
 import {
   Box,
-  Drawer,
+  Divider,
   IconButton,
-  styled,
-  Toolbar,
-  Typography,
-  useTheme,
   List,
   ListItem,
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Divider,
+  Toolbar,
+  Typography,
 } from "@mui/material";
 import MuiAppBar, {
   type AppBarProps as MuiAppBarProps,
 } from "@mui/material/AppBar";
+import MuiDrawer from "@mui/material/Drawer";
+import {
+  styled,
+  useTheme,
+  type CSSObject,
+  type Theme,
+} from "@mui/material/styles";
 import { createRootRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import React from "react";
 
 const drawerWidth = 240;
 
-const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })<{
-  open?: boolean;
-}>(({ theme }) => ({
-  flexGrow: 1,
-  padding: theme.spacing(3),
-  transition: theme.transitions.create("margin", {
+const openedMixin = (theme: Theme): CSSObject => ({
+  width: drawerWidth,
+  transition: theme.transitions.create("width", {
+    easing: theme.transitions.easing.sharp,
+    duration: theme.transitions.duration.enteringScreen,
+  }),
+  overflowX: "hidden",
+});
+
+const closedMixin = (theme: Theme): CSSObject => ({
+  transition: theme.transitions.create("width", {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,
   }),
-  marginLeft: `-${drawerWidth}px`,
-  variants: [
-    {
-      props: ({ open }) => open,
-      style: {
-        transition: theme.transitions.create("margin", {
-          easing: theme.transitions.easing.easeOut,
-          duration: theme.transitions.duration.enteringScreen,
-        }),
-        marginLeft: 0,
-      },
-    },
-  ],
+  overflowX: "hidden",
+  width: `calc(${theme.spacing(7)} + 1px)`,
+  [theme.breakpoints.up("sm")]: {
+    width: `calc(${theme.spacing(8)} + 1px)`,
+  },
+});
+
+const DrawerHeader = styled("div")(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "flex-end",
+  padding: theme.spacing(0, 1),
+  // necessary for content to be below app bar
+  ...theme.mixins.toolbar,
 }));
 
 interface AppBarProps extends MuiAppBarProps {
@@ -57,7 +68,8 @@ interface AppBarProps extends MuiAppBarProps {
 const AppBar = styled(MuiAppBar, {
   shouldForwardProp: (prop) => prop !== "open",
 })<AppBarProps>(({ theme }) => ({
-  transition: theme.transitions.create(["margin", "width"], {
+  zIndex: theme.zIndex.drawer + 1,
+  transition: theme.transitions.create(["width", "margin"], {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,
   }),
@@ -65,10 +77,10 @@ const AppBar = styled(MuiAppBar, {
     {
       props: ({ open }) => open,
       style: {
+        marginLeft: drawerWidth,
         width: `calc(100% - ${drawerWidth}px)`,
-        marginLeft: `${drawerWidth}px`,
-        transition: theme.transitions.create(["margin", "width"], {
-          easing: theme.transitions.easing.easeOut,
+        transition: theme.transitions.create(["width", "margin"], {
+          easing: theme.transitions.easing.sharp,
           duration: theme.transitions.duration.enteringScreen,
         }),
       },
@@ -76,26 +88,46 @@ const AppBar = styled(MuiAppBar, {
   ],
 }));
 
-const DrawerHeader = styled("div")(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  padding: theme.spacing(0, 1),
-  ...theme.mixins.toolbar,
-  justifyContent: "flex-end",
+const Drawer = styled(MuiDrawer, {
+  shouldForwardProp: (prop) => prop !== "open",
+})(({ theme }) => ({
+  width: drawerWidth,
+  flexShrink: 0,
+  whiteSpace: "nowrap",
+  boxSizing: "border-box",
+  variants: [
+    {
+      props: ({ open }) => open,
+      style: {
+        ...openedMixin(theme),
+        "& .MuiDrawer-paper": openedMixin(theme),
+      },
+    },
+    {
+      props: ({ open }) => !open,
+      style: {
+        ...closedMixin(theme),
+        "& .MuiDrawer-paper": closedMixin(theme),
+      },
+    },
+  ],
 }));
 
 const routes = [
   {
     path: "/",
     label: "CSS",
+    icon: <CssIcon />,
   },
   {
     path: "/generate-text",
     label: "Lorem Ipsum",
+    icon: <NewspaperIcon />,
   },
   {
-    path: "/fake-data",
-    label: "Fake Data",
+    path: "/mock-data",
+    label: "Mock Data",
+    icon: <EditNoteIcon />,
   },
 ];
 
@@ -127,7 +159,7 @@ function RouteComponent() {
               edge="start"
               sx={[
                 {
-                  mr: 2,
+                  marginRight: 5,
                 },
                 open && { display: "none" },
               ]}
@@ -135,55 +167,78 @@ function RouteComponent() {
               <MenuIcon />
             </IconButton>
             <Typography variant="h6" noWrap component="div">
-              Converter Mate
+              Convertor Mate
             </Typography>
           </Toolbar>
         </AppBar>
-        <Drawer
-          sx={{
-            width: drawerWidth,
-            flexShrink: 0,
-            "& .MuiDrawer-paper": {
-              width: drawerWidth,
-              boxSizing: "border-box",
-            },
-          }}
-          variant="persistent"
-          anchor="left"
-          open={open}
-        >
+        <Drawer variant="permanent" open={open}>
           <DrawerHeader>
             <IconButton onClick={handleDrawerClose}>
-              {theme.direction === "ltr" ? (
-                <ChevronLeftIcon />
-              ) : (
+              {theme.direction === "rtl" ? (
                 <ChevronRightIcon />
+              ) : (
+                <ChevronLeftIcon />
               )}
             </IconButton>
           </DrawerHeader>
           <Divider />
           <List>
-            {routes.map((route, index) => (
-              <ListItem key={route.path} disablePadding>
-                <>
-                  <ListItemButton
-                    onClick={() => navigate({ to: route.path })}
-                    sx={{ textDecoration: "none", color: "inherit" }}
+            {routes.map((r) => (
+              <ListItem key={r.path} disablePadding sx={{ display: "block" }}>
+                <ListItemButton
+                  sx={[
+                    {
+                      minHeight: 48,
+                      px: 2.5,
+                    },
+                    open
+                      ? {
+                          justifyContent: "initial",
+                        }
+                      : {
+                          justifyContent: "center",
+                        },
+                  ]}
+                  onClick={() => navigate({ to: r.path })}
+                >
+                  <ListItemIcon
+                    sx={[
+                      {
+                        minWidth: 0,
+                        justifyContent: "center",
+                      },
+                      open
+                        ? {
+                            mr: 3,
+                          }
+                        : {
+                            mr: "auto",
+                          },
+                    ]}
                   >
-                    <ListItemIcon>
-                      {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                    </ListItemIcon>
-                    <ListItemText primary={route.label} />
-                  </ListItemButton>
-                </>
+                    {r.icon}
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={r.label}
+                    sx={[
+                      open
+                        ? {
+                            opacity: 1,
+                          }
+                        : {
+                            opacity: 0,
+                          },
+                    ]}
+                  />
+                </ListItemButton>
               </ListItem>
             ))}
           </List>
         </Drawer>
-        <Main open={open}>
+        <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
           <DrawerHeader />
           <Outlet />
-        </Main>
+        </Box>
       </Box>
     </>
   );
